@@ -1,87 +1,75 @@
-# Certipy - Active Directory certificate abuse
-#
-# Description:
-#   Various constants
-#
-# Authors:
-#   @ollypwn (https://github.com/ollypwn)
-#
-# References:
-#   http://sctech.weebly.com/well-known-sids.html
-#   https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-crtd/1192823c-d839-4bc3-9b6b-fa8c53507ae1
-#   https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-crtd/ec71fd43-61c2-407b-83c9-b52272dec8a1
-#   https://github.com/GhostPack/Certify/blob/2b1530309c0c5eaf41b2505dfd5a68c83403d031/Certify/Domain/CertificateAuthority.cs#L23
-#   https://www.pkisolutions.com/object-identifiers-oid-in-pki/
-#   https://docs.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.accesscontroltype?view=net-5.0
-#   https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=net-5.0
-#   https://github.com/GhostPack/Certify/blob/2b1530309c0c5eaf41b2505dfd5a68c83403d031/Certify/Domain/CertificateAuthority.cs#L11
-#
+from certipy.lib.structs import IntFlag, _decompose
 
-from certipy.structs import IntFlag
-
-# http://sctech.weebly.com/well-known-sids.html
-WELL_KNOWN_SIDS = {
-    "S-1-0": "Null Authority",
-    "S-1-0-0": "Nobody",
-    "S-1-1": "World Authority",
-    "S-1-1-0": "Everyone",
-    "S-1-2": "Local Authority",
-    "S-1-3": "Creator Authority",
-    "S-1-3-0": "Creator Owner",
-    "S-1-3-1": "Creator Group",
-    "S-1-3-2": "Creator Owner Server",
-    "S-1-3-3": "Creator Group Server",
-    "S-1-4": "Non-unique Authority",
-    "S-1-5": "NT Authority",
-    "S-1-5-1": "Dialup",
-    "S-1-5-2": "Network",
-    "S-1-5-3": "Batch",
-    "S-1-5-4": "Interactive",
-    "S-1-5-6": "Service",
-    "S-1-5-7": "Anonymous",
-    "S-1-5-8": "Proxy",
-    "S-1-5-9": "Enterprise Domain Controller",
-    "S-1-5-10": "Principal Self",
-    "S-1-5-11": "Authenticated Users",
-    "S-1-5-12": "Restricted Code",
-    "S-1-5-13": "Terminal Server Users",
-    "S-1-5-18": "Local System",
-    "S-1-5-19": "NT Authority",
-    "S-1-5-20": "NT Authority",
-    "S-1-5-32-544": "BUILTIN\\Administrator",
-    "S-1-5-32-545": "BUILTIN\\User",
-    "S-1-5-32-546": "BUILTIN\\Guess",
-    "S-1-5-32-547": "BUILTIN\\Power User",
-    "S-1-5-32-548": "BUILTIN\\Account Operators",
-    "S-1-5-32-549": "BUILTIN\\Server Operators",
-    "S-1-5-32-550": "BUILTIN\\Print Operators",
-    "S-1-5-32-551": "BUILTIN\\Backup Operators",
-    "S-1-5-32-552": "BUILTIN\\Replicators",
-    "S-1-5-32-554": "BUILTIN\\Pre-Windows 2000 Compatible Access",
-    "S-1-5-32-555": "BUILTIN\\Remote Desktop Users",
-    "S-1-5-32-556": "BUILTIN\\Network Configuration Operators",
-    "S-1-5-32-557": "BUILTIN\\Incoming Forest Trust Builders",
-    "S-1-5-32-558": "BUILTIN\\Performance Monitor Users",
-    "S-1-5-32-559": "BUILTIN\\Performance Log Users",
-    "S-1-5-32-560": "BUILTIN\\Windows Authorization Access Group",
-    "S-1-5-32-561": "BUILTIN\\Terminal Server License Servers",
-    "S-1-5-32-562": "BUILTIN\\Distributed COM User",
-    "S-1-5-32-568": "BUILTIN\\IIS_IUSRS",
-    "S-1-5-32-569": "BUILTIN\\Cryptograhic Operators",
-    "S-1-5-32-573": "BUILTIN\\Event Log Readers",
-    "S-1-5-64-10": "NTLM Authentication",
-    "S-1-5-64-14": "SChannel Authentication",
-    "S-1-5-64-21": "Digest Authenitication",
-    "S-1-5-64-1000": "Other Organization",
-    "S-1-6": "Site Server Authority An identifier authority",
-    "S-1-7": "Internet Site Authority An identifier authority",
-    "S-1-8": "Exchange Authority An identifier authority",
-    "S-1-9": "Resource Manager Authority An identifier",
+# https://github.com/fox-it/BloodHound.py/blob/d665959c58d881900378040e6670fa12f801ccd4/bloodhound/ad/utils.py#L36
+WELLKNOWN_SIDS = {
+    "S-1-0": ("Null Authority", "USER"),
+    "S-1-0-0": ("Nobody", "USER"),
+    "S-1-1": ("World Authority", "USER"),
+    "S-1-1-0": ("Everyone", "GROUP"),
+    "S-1-2": ("Local Authority", "USER"),
+    "S-1-2-0": ("Local", "GROUP"),
+    "S-1-2-1": ("Console Logon", "GROUP"),
+    "S-1-3": ("Creator Authority", "USER"),
+    "S-1-3-0": ("Creator Owner", "USER"),
+    "S-1-3-1": ("Creator Group", "GROUP"),
+    "S-1-3-2": ("Creator Owner Server", "COMPUTER"),
+    "S-1-3-3": ("Creator Group Server", "COMPUTER"),
+    "S-1-3-4": ("Owner Rights", "GROUP"),
+    "S-1-4": ("Non-unique Authority", "USER"),
+    "S-1-5": ("NT Authority", "USER"),
+    "S-1-5-1": ("Dialup", "GROUP"),
+    "S-1-5-2": ("Network", "GROUP"),
+    "S-1-5-3": ("Batch", "GROUP"),
+    "S-1-5-4": ("Interactive", "GROUP"),
+    "S-1-5-6": ("Service", "GROUP"),
+    "S-1-5-7": ("Anonymous", "GROUP"),
+    "S-1-5-8": ("Proxy", "GROUP"),
+    "S-1-5-9": ("Enterprise Domain Controllers", "GROUP"),
+    "S-1-5-10": ("Principal Self", "USER"),
+    "S-1-5-11": ("Authenticated Users", "GROUP"),
+    "S-1-5-12": ("Restricted Code", "GROUP"),
+    "S-1-5-13": ("Terminal Server Users", "GROUP"),
+    "S-1-5-14": ("Remote Interactive Logon", "GROUP"),
+    "S-1-5-15": ("This Organization", "GROUP"),
+    "S-1-5-17": ("IUSR", "USER"),
+    "S-1-5-18": ("Local System", "USER"),
+    "S-1-5-19": ("NT Authority", "USER"),
+    "S-1-5-20": ("Network Service", "USER"),
+    "S-1-5-80-0": ("All Services ", "GROUP"),
+    "S-1-5-32-544": ("Administrators", "GROUP"),
+    "S-1-5-32-545": ("Users", "GROUP"),
+    "S-1-5-32-546": ("Guests", "GROUP"),
+    "S-1-5-32-547": ("Power Users", "GROUP"),
+    "S-1-5-32-548": ("Account Operators", "GROUP"),
+    "S-1-5-32-549": ("Server Operators", "GROUP"),
+    "S-1-5-32-550": ("Print Operators", "GROUP"),
+    "S-1-5-32-551": ("Backup Operators", "GROUP"),
+    "S-1-5-32-552": ("Replicators", "GROUP"),
+    "S-1-5-32-554": ("Pre-Windows 2000 Compatible Access", "GROUP"),
+    "S-1-5-32-555": ("Remote Desktop Users", "GROUP"),
+    "S-1-5-32-556": ("Network Configuration Operators", "GROUP"),
+    "S-1-5-32-557": ("Incoming Forest Trust Builders", "GROUP"),
+    "S-1-5-32-558": ("Performance Monitor Users", "GROUP"),
+    "S-1-5-32-559": ("Performance Log Users", "GROUP"),
+    "S-1-5-32-560": ("Windows Authorization Access Group", "GROUP"),
+    "S-1-5-32-561": ("Terminal Server License Servers", "GROUP"),
+    "S-1-5-32-562": ("Distributed COM Users", "GROUP"),
+    "S-1-5-32-568": ("IIS_IUSRS", "GROUP"),
+    "S-1-5-32-569": ("Cryptographic Operators", "GROUP"),
+    "S-1-5-32-573": ("Event Log Readers", "GROUP"),
+    "S-1-5-32-574": ("Certificate Service DCOM Access", "GROUP"),
+    "S-1-5-32-575": ("RDS Remote Access Servers", "GROUP"),
+    "S-1-5-32-576": ("RDS Endpoint Servers", "GROUP"),
+    "S-1-5-32-577": ("RDS Management Servers", "GROUP"),
+    "S-1-5-32-578": ("Hyper-V Administrators", "GROUP"),
+    "S-1-5-32-579": ("Access Control Assistance Operators", "GROUP"),
+    "S-1-5-32-580": ("Access Control Assistance Operators", "GROUP"),
 }
 
 
 # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-crtd/1192823c-d839-4bc3-9b6b-fa8c53507ae1
 class MS_PKI_CERTIFICATE_NAME_FLAG(IntFlag):
+    NONE = 0x00000000
     ENROLLEE_SUPPLIES_SUBJECT = 0x00000001
     ADD_EMAIL = 0x00000002
     ADD_OBJ_GUID = 0x00000004
@@ -122,6 +110,25 @@ class MS_PKI_ENROLLMENT_FLAG(IntFlag):
     ALLOW_PREVIOUS_APPROVAL_KEYBASEDRENEWAL_VALIDATE_REENROLLMENT = 0x00010000
     ISSUANCE_POLICIES_FROM_REQUEST = 0x00020000
     SKIP_AUTO_RENEWAL = 0x00040000
+    NO_SECURITY_EXTENSION = 0x00080000
+
+
+# https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-crtd/f6122d87-b999-4b92-bff8-f465e8949667
+class MS_PKI_PRIVATE_KEY_FLAG(IntFlag):
+    REQUIRE_PRIVATE_KEY_ARCHIVAL = 0x00000001
+    EXPORTABLE_KEY = 0x00000010
+    STRONG_KEY_PROTECTION_REQUIRED = 0x00000020
+    REQUIRE_ALTERNATE_SIGNATURE_ALGORITHM = 0x00000040
+    REQUIRE_SAME_KEY_RENEWAL = 0x00000080
+    USE_LEGACY_PROVIDER = 0x00000100
+    ATTEST_NONE = 0x00000000
+    ATTEST_REQUIRED = 0x00002000
+    ATTEST_PREFERRED = 0x00001000
+    ATTESTATION_WITHOUT_POLICY = 0x00004000
+    EK_TRUST_ON_USE = 0x00000200
+    EK_VALIDATE_CERT = 0x00000400
+    EK_VALIDATE_KEY = 0x00000800
+    HELLO_LOGON_KEY = 0x00200000
 
 
 # https://github.com/GhostPack/Certify/blob/2b1530309c0c5eaf41b2505dfd5a68c83403d031/Certify/Domain/CertificateAuthority.cs#L23
@@ -190,7 +197,7 @@ OID_TO_STR_MAP = {
     "1.3.6.1.4.1.311.10.3.2": "Microsoft Time Stamping",
     "1.3.6.1.4.1.311.76.8.1": "Microsoft Publishe",
     "1.3.6.1.5.5.7.3.2": "Client Authentication",
-    "1.3.6.1.5.2.3.4": "PKIINIT Client Authentication",
+    "1.3.6.1.5.2.3.4": "PKINIT Client Authentication",
     "1.3.6.1.4.1.311.10.3.13": "Lifetime Signing",
     "2.5.29.37.0": "Any Purpose",
     "1.3.6.1.4.1.311.64.1.1": "Server Trust",
@@ -225,6 +232,41 @@ class ACTIVE_DIRECTORY_RIGHTS(IntFlag):
     LIST_CHILDREN = 4
     DELETE_CHILD = 2
     CREATE_CHILD = 1
+
+    def to_list(self):
+        cls = self.__class__
+        members, _ = _decompose(cls, self._value_)
+        filtered_members = []
+        for member in members:
+            found = False
+            for n in members:
+                if n & member and n != member:
+                    found = True
+
+            if not found:
+                filtered_members.append(member)
+        return members
+
+
+class CERTIFICATE_RIGHTS(IntFlag):
+    GENERIC_ALL = 983551
+    WRITE_OWNER = 524288
+    WRITE_DACL = 262144
+    WRITE_PROPERTY = 32
+
+    def to_list(self):
+        cls = self.__class__
+
+        if self._value_ == self.GENERIC_ALL:
+            return [CERTIFICATE_RIGHTS(self.GENERIC_ALL)]
+
+        members, _ = _decompose(cls, self._value_)
+        filtered_members = []
+        for member in members:
+            if str(member) == str(member.value):
+                continue
+            filtered_members.append(member)
+        return filtered_members
 
 
 # https://github.com/GhostPack/Certify/blob/2b1530309c0c5eaf41b2505dfd5a68c83403d031/Certify/Domain/CertificateAuthority.cs#L11
@@ -282,7 +324,7 @@ EXTENDED_RIGHTS_MAP = {
     "be2bb760-7f46-11d2-b9ad-00c04f79f805": "Update-Schema-Cache",
     "62dd28a8-7f46-11d2-b9ad-00c04f79f805": "Recalculate-Security-Inheritance",
     "69ae6200-7f46-11d2-b9ad-00c04f79f805": "DS-Check-Stale-Phantoms",
-    "0e10c968-78fb-11d2-90d4-00c04f79dc55": "Certificate-Enrollment",
+    "0e10c968-78fb-11d2-90d4-00c04f79dc55": "Enroll",
     "bf9679c0-0de6-11d0-a285-00aa003049e2": "Self-Membership",
     "72e39547-7b18-11d1-adef-00c04fd8d5cd": "DNS-Host-Name-Attributes",
     "f3a64788-5306-11d1-a9c5-0000f80367c1": "Validated-SPN",
@@ -319,7 +361,7 @@ EXTENDED_RIGHTS_MAP = {
     "3e0f7e18-2c7a-4c10-ba82-4d926db99a3e": "DS-Clone-Domain-Controlle",
     "d31a8757-2447-4545-8081-3bb610cacbf2": "Validated-MS-DS-Behavior-Version",
     "80863791-dbe9-4eb8-837e-7f0ab55d9ac7": "Validated-MS-DS-Additional-DNS-Host-Name",
-    "a05b8cc2-17bc-4802-a710-e7c15ab866a2": "Certificate-AutoEnrollment",
+    "a05b8cc2-17bc-4802-a710-e7c15ab866a2": "AutoEnroll",
     "4125c71f-7fac-4ff0-bcb7-f09a41325286": "DS-Set-Owne",
     "88a9933e-e5c8-4f2a-9dd7-2527416b8092": "DS-Bypass-Quota",
     "084c93a2-620d-4879-a836-f0ae47de0e89": "DS-Read-Partition-Secrets",
